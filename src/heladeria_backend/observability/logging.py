@@ -10,12 +10,11 @@ def setup_logging() -> None:
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
     ]
 
     if is_production:
         shared_processors.append(structlog.processors.dict_tracebacks)
-    else:
-        shared_processors.append(structlog.processors.format_exc_info)
 
     renderer = (
         structlog.processors.JSONRenderer()
@@ -43,24 +42,27 @@ def setup_logging() -> None:
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-
     root = logging.getLogger()
     root.handlers.clear()
     root.addHandler(handler)
     root.setLevel(logging.DEBUG if settings.app.debug else logging.INFO)
 
-    # pymongo: WARNING por defecto; ERROR para los emisores de alta frecuencia.
-    # pymongo.topology se deja en WARNING: ahí aparecen failovers y
-    # server selection, que en prod sí quieres ver.
+    logging.getLogger("uvicorn.access").disabled = True
     logging.getLogger("pymongo").setLevel(logging.WARNING)
-    logging.getLogger("pymongo.topology").setLevel(logging.WARNING)
-    logging.getLogger("pymongo.command").setLevel(logging.ERROR)
+    logging.getLogger("pymongo.topology").setLevel(logging.ERROR)
     logging.getLogger("pymongo.connection").setLevel(logging.ERROR)
-    logging.getLogger("pymongo.serverSelection").setLevel(logging.ERROR)
-
+    logging.getLogger("pymongo.command").setLevel(logging.ERROR)
 
 def reconfigure_uvicorn_loggers() -> None:
-    for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
-        lg = logging.getLogger(name)
-        lg.handlers.clear()
-        lg.propagate = True
+    log_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {},
+        "handlers": {},
+        "loggers": {
+            "uvicorn": {"handlers": [], "level": "INFO"},
+            "uvicorn.error": {"level": "INFO"},
+            "uvicorn.access": {"handlers": [], "level": "INFO"},
+        },
+    }
+    logging.config.dictConfig(log_config)

@@ -1,7 +1,7 @@
-import asyncio
 import structlog
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from heladeria_backend.shared.adapters.outbound.persistence.mongo import ping_mongo
 
 logger = structlog.get_logger()
 router = APIRouter(prefix="/health", tags=["health"])
@@ -22,11 +22,8 @@ async def readiness(request: Request):
         )
 
     try:
-        await asyncio.wait_for(
-            client.admin.command("ping"),
-            timeout=2.0,
-        )
-        return {"status": "ok"}
+        await ping_mongo(client, timeout_ms=2000)
+        return {"status": "ok", "database": "connected"}
     except Exception:
         logger.exception("readiness.ping.failed")
         return JSONResponse(
@@ -47,10 +44,7 @@ async def status(request: Request):
         return result
 
     try:
-        await asyncio.wait_for(
-            client.admin.command("ping"),
-            timeout=2.0,
-        )
+        await ping_mongo(client, timeout_ms=2000)
         result["database"]["status"] = "connected"
     except Exception:
         logger.exception("status.ping.failed")
