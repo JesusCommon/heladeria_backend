@@ -39,7 +39,7 @@ class MongoUnitOfWork(UnitOfWork):
         return self._session
 
     async def __aenter__(self) -> Self:
-        self._session = await self._client.start_session()
+        self._session = self._client.start_session()
 
         if self._supports_transactions:
             try:
