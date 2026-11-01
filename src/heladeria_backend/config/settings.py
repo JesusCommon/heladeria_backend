@@ -35,6 +35,9 @@ class MongoSettings(BaseSettings):
     connect_timeout_ms: int = Field(gt=0)
     socket_timeout_ms: int = Field(gt=0)
     wait_queue_timeout_ms: int = Field(default=10_000, gt=0)
+    max_idle_time_ms: int = Field(default=120_000, gt=0)
+    connect_max_attempts: int = Field(default=5, gt=0)
+    connect_backoff_ms: int = Field(default=1_000, ge=0)
 
     @field_validator("url")
     @classmethod

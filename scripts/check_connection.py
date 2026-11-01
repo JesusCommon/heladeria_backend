@@ -1,6 +1,10 @@
 import asyncio
+import sys
 import time
 import structlog
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from heladeria_backend.config.settings import settings
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     create_mongo_client,
@@ -66,7 +70,7 @@ async def main() -> None:
         print("=" * 60)
         print(f"  ✗ Error de conexión: {e}")
         print("=" * 60)
-        raise
+        sys.exit(1)
     finally:
         await client.close()
 

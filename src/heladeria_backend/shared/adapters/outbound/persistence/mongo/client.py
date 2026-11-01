@@ -11,6 +11,7 @@ def create_mongo_client() -> AsyncMongoClient:
         connectTimeoutMS=settings.mongo.connect_timeout_ms,
         socketTimeoutMS=settings.mongo.socket_timeout_ms,
         waitQueueTimeoutMS=settings.mongo.wait_queue_timeout_ms,
+        maxIdleTimeMS=settings.mongo.max_idle_time_ms,
         retryWrites=True,
         retryReads=True,
     )

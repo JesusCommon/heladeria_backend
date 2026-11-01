@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import sys
 import structlog
 from heladeria_backend.config.settings import settings
