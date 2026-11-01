@@ -3,12 +3,13 @@
 ## Arquitectura de Base de Datos
 
 ### Desarrollo Local
-- **MongoDB**: Instalado localmente (Community Server)
-- **Replica Set**: No configurado
-- **Transacciones**: No disponibles
-- **URI**: `mongodb://localhost:27017`
+- **Instancia**: `mongod.exe` como replica set de un solo nodo (`rs0`), puerto 27018, datos en `.mongodb-data/`
+- **Transacciones**: Disponibles (requisito del dominio: reservas de inventario)
+- **URI**: `mongodb://localhost:27018` (definida en `.env`)
 
-**Razón**: Evita overhead de Docker para infraestructura de datos y problemas de compatibilidad de CPU (AVX).
+**Arranque** (idempotente): `powershell -File scripts/start_dev_mongo.ps1`
+
+**Razón**: MongoDB standalone no soporta transacciones multi-documento. El dominio las necesita para reservas atómicas de inventario y pruebas de concurrencia reales. En vez de convertir el servicio Windows de MongoDB (27017, requiere admin) en replica set, se ejecuta una instancia dedicada de desarrollo sin afectar al servicio instalado.
 
 ### Producción
 - **MongoDB**: Atlas (M0+ tier)

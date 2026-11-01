@@ -43,7 +43,7 @@ class MongoUnitOfWork(UnitOfWork):
 
         if self._supports_transactions:
             try:
-                self._session.start_transaction()
+                await self._session.start_transaction()
                 self._transaction_active = True
             except (InvalidOperation, OperationFailure) as e:
                 logger.warning(
