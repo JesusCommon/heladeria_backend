@@ -13,9 +13,8 @@ from heladeria_backend.identity.application.use_cases import (
     create_user,
     login,
 )
-import jwt
-from heladeria_backend.shared.domain.errors import DomainError
 from heladeria_backend.identity.domain.identity import Principal, Role
+from heladeria_backend.shared.domain.errors import DomainError
 
 router = APIRouter(prefix="/admin", tags=["admin-auth"])
 

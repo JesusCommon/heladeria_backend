@@ -1,9 +1,8 @@
 """Casos de uso de Tables: mesas, dispositivos, sesiones."""
 
+import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any
-import uuid
 
 import structlog
 
@@ -27,9 +26,9 @@ from heladeria_backend.tables.domain.tables import (
     CustomerSessionStatus,
     Device,
     Table,
+    TableSession,
     TableSessionStatus,
     TableStatus,
-    TableSession,
     generate_link_code,
     generate_session_token,
 )

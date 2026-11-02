@@ -23,6 +23,7 @@ from heladeria_backend.inventory.domain.ports import (
     InventoryAtomicPort,
     ReservationRepository,
 )
+from heladeria_backend.orders.application.transactional import run_transaction
 from heladeria_backend.orders.domain.order import (
     IdempotencyRecord,
     Order,
@@ -35,8 +36,7 @@ from heladeria_backend.orders.domain.ports import (
     OrderNumberPort,
     OrderRepository,
 )
-from heladeria_backend.orders.application.transactional import run_transaction
-from heladeria_backend.pricing.domain.service import LinePrice, order_total, price_line
+from heladeria_backend.pricing.domain.service import LinePrice, price_line
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.unit_of_work import (
     MongoUnitOfWork,
 )
@@ -315,7 +315,7 @@ async def _transition_tx(session, deps: OrdersDeps, order_id: str,
         if reservation is None:
             raise ConflictError("Pedido sin reserva activa para consumir")
         if reservation.status is ReservationState.ACTIVE:
-            lines = {l.inventory_item_id: l.quantity for l in reservation.lines}
+            lines = {ln.inventory_item_id: ln.quantity for ln in reservation.lines}
             await deps.inv_atomic.consume(lines, order.id, actor="order-preparing", session=session)
             reservation.status = ReservationState.CONSUMED
             reservation.consumed_at = deps.clock.now()
@@ -324,7 +324,7 @@ async def _transition_tx(session, deps: OrdersDeps, order_id: str,
     if new_status in (OrderStatus.CANCELLED, OrderStatus.EXPIRED) and order.reservation_id:
         reservation = await deps.reservations.get(order.reservation_id, session=session)
         if reservation is not None and reservation.status is ReservationState.ACTIVE:
-            lines = {l.inventory_item_id: l.quantity for l in reservation.lines}
+            lines = {ln.inventory_item_id: ln.quantity for ln in reservation.lines}
             await deps.inv_atomic.release(lines, order.id, actor=f"order-{new_status.value}", session=session)
             reservation.status = (
                 ReservationState.EXPIRED if new_status is OrderStatus.EXPIRED else ReservationState.RELEASED

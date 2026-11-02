@@ -9,3 +9,6 @@ test-all:
 
 check-connection:
 	uv run python -m scripts.check_connection
+
+lint:
+	uv run ruff check src tests --select E,F,I,W --line-length 120

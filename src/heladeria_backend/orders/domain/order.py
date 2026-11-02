@@ -1,8 +1,8 @@
 """Dominio de Orders: agregado pedido + máquina de estados legal."""
 
+import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
-import uuid
 
 from pydantic import BaseModel, Field, model_validator
 

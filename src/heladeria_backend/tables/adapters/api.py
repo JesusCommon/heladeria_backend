@@ -86,7 +86,12 @@ async def create_device_link(
     c = container(request)
     from heladeria_backend.tables.application.use_cases import create_device_link as uc
     device, code = await uc(c.tables_ctx, dto.table_id, settings.security.device_link_ttl_minutes, dto.device_name)
-    return {"id": device.id, "table_id": device.linked_table_id, "link_code": code, "expires_at": device.link_expires_at.isoformat()}
+    return {
+        "id": device.id,
+        "table_id": device.linked_table_id,
+        "link_code": code,
+        "expires_at": device.link_expires_at.isoformat(),
+    }
 
 
 @router.delete("/devices/{device_id}", status_code=204)

@@ -4,10 +4,10 @@ Nada hardcodeado: límites y opciones viven en la configuración persistida
 de cada producto (Product.customization).
 """
 
-from pydantic import BaseModel, Field, model_validator
-from typing import Literal
-import inspect
 import uuid
+from typing import Literal
+
+from pydantic import BaseModel, Field, model_validator
 
 from heladeria_backend.shared.domain.errors import DomainValidationError
 from heladeria_backend.shared.domain.mixins import TimestampMixin
@@ -144,7 +144,6 @@ class CustomizationValidator:
                 raise DomainValidationError(f"Opción '{option.catalog_item_id}' inactiva en '{group.name}'")
             g = counts_per_group.setdefault(group.id, {})
             g[s.catalog_item_id] = g.get(s.catalog_item_id, 0) + s.quantity
-            gcounts = counts_per_group[group.id]
 
         for group in product.customization:
             sel_map = counts_per_group.get(group.id, {})
@@ -156,7 +155,9 @@ class CustomizationValidator:
             if group.required and require_required_groups and effective < group.min_selections:
                 raise DomainValidationError(f"Grupo '{group.name}': mínimo {group.min_selections}")
             if sel_map and effective > group.max_selections:
-                raise DomainValidationError(f"Grupo '{group.name}': máximo {group.max_selections} (recibido {effective})")
+                raise DomainValidationError(
+                    f"Grupo '{group.name}': máximo {group.max_selections} (recibido {effective})"
+                )
             for item_id, qty in sel_map.items():
                 opt = product.option(group.id, item_id)
                 if not group.allow_per_option_quantity and qty > 1:

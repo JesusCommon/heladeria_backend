@@ -161,8 +161,6 @@ async def test_price_quote_computed_server_side(api_env):
 async def test_price_quote_quantity_line_subtotal(api_env):
     f1 = await _item(api_env, "Nata")
     p = await _cone(api_env, [f1["id"]])
-    owner = await api_env.owner_headers()
-    # cotización con quantity=3 del producto
     group = p["customization"][0]
     res = await api_env.http.post(
         "/api/v1/public/price-quote",
@@ -183,7 +181,6 @@ async def test_price_quote_rejects_tampering(api_env):
     """No hay forma de pasar precios desde el cliente y más bolas se validan."""
     f1 = await _item(api_env, "Pistacho")
     p = await _cone(api_env, [f1["id"]], max_balls=3)
-    owner = await api_env.owner_headers()
     group = p["customization"][0]
     # 4 bolas en un cono de 3: rechazo
     res = await api_env.http.post(

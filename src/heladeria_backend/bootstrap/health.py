@@ -3,7 +3,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
-    MongoConnection,
     ping_mongo,
 )
 

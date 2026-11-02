@@ -1,6 +1,5 @@
 """Fixtures compartidas de dominio (catálogo ejemplo de la especificación)."""
 
-import pytest_asyncio
 import uuid
 
 from heladeria_backend.catalog.domain.catalog import (

@@ -10,7 +10,7 @@ from heladeria_backend.shared.adapters.outbound.persistence.mongo.repo_mixins im
     dump_bson,
     load,
 )
-from heladeria_backend.shared.domain.errors import ConflictError, NotFoundError
+from heladeria_backend.shared.domain.errors import ConflictError
 from heladeria_backend.tables.domain.ports import (
     CustomerSessionRepository,
     DeviceRepository,

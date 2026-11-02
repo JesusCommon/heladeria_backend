@@ -1,5 +1,7 @@
 from pymongo import AsyncMongoClient
+
 from heladeria_backend.config.settings import settings
+
 
 def create_mongo_client() -> AsyncMongoClient:
     return AsyncMongoClient(

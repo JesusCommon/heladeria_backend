@@ -1,10 +1,11 @@
 """Dominio de inventario: elementos, reservas y movimientos."""
 
+import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
-from pydantic import BaseModel, Field, model_validator
 from typing import Literal
-import uuid
+
+from pydantic import BaseModel, Field, model_validator
 
 from heladeria_backend.shared.domain.mixins import TimestampMixin
 

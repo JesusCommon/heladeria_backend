@@ -3,7 +3,6 @@
 import uuid
 
 import httpx
-import pytest
 import pytest_asyncio
 
 from heladeria_backend.bootstrap.app_factory import create_app

@@ -1,4 +1,5 @@
 import pytest
+
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     MongoUnitOfWork,
 )

@@ -74,6 +74,7 @@ def test_snapshots_preserve_names_and_prices():
 
 def test_negative_base_price_rejected():
     import pydantic
+
     from heladeria_backend.catalog.domain.catalog import Product
 
     with pytest.raises(pydantic.ValidationError):

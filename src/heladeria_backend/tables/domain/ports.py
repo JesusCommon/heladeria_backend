@@ -1,7 +1,6 @@
 """Puertos de Tables."""
 
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any
 
 from heladeria_backend.tables.domain.tables import (
@@ -10,6 +9,7 @@ from heladeria_backend.tables.domain.tables import (
     Table,
     TableSession,
 )
+
 
 class TableRepository(ABC):
     @abstractmethod
@@ -64,4 +64,6 @@ class CustomerSessionRepository(ABC):
     async def get_by_token_hash(self, token_hash: str, session: Any | None = None) -> CustomerSession | None: ...
 
     @abstractmethod
-    async def list_by_table_session(self, table_session_id: str, session: Any | None = None) -> list[CustomerSession]: ...
+    async def list_by_table_session(
+        self, table_session_id: str, session: Any | None = None
+    ) -> list[CustomerSession]: ...

@@ -70,8 +70,6 @@ async def seed_owner_if_empty(ctx: IdentityContext, username: str, password: str
     """Bootstrap de arranque: crea el único OWNER inicial si no hay ningún usuario."""
     if await ctx.users.exists_any():
         return None
-    from datetime import UTC, datetime, timedelta
-    system_principal = Principal(sub="", role=Role.OWNER, exp=datetime.now(UTC))
     user = AdminUser(username=username, password_hash=ctx.hasher.hash(password), role=Role.OWNER)
     await ctx.users.save(user)
     logger.info("identity.seed.owner", username=username)

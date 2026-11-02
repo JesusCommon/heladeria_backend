@@ -9,9 +9,6 @@ from heladeria_backend.bootstrap.indexes import ensure_indexes
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.client import (
     create_mongo_client,
 )
-from heladeria_backend.shared.adapters.outbound.persistence.mongo.connection import (
-    MongoConnection,
-)
 
 URI = "mongodb://localhost:27018/?replicaSet=rs0"
 

@@ -1,4 +1,5 @@
 import pytest
+
 from heladeria_backend.config.settings import get_settings
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     create_mongo_client,

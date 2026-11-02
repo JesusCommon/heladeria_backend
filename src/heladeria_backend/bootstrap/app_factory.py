@@ -61,7 +61,10 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=422,
             content={
-                "detail": [f"{'.'.join(str(p) for p in e.get('loc', []))}: {e.get('msg', str(e))}" for e in exc.errors()],
+                "detail": [
+                    f"{'.'.join(str(p) for p in e.get('loc', []))}: {e.get('msg', str(e))}"
+                    for e in exc.errors()
+                ],
                 "code": "validation_error",
             },
         )

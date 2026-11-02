@@ -1,8 +1,11 @@
 import logging
 import logging.config
 import sys
+
 import structlog
+
 from heladeria_backend.config.settings import settings
+
 
 def setup_logging() -> None:
     is_production = settings.app.environment == "production"

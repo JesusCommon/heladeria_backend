@@ -1,7 +1,7 @@
 """Pruebas unitarias del inventario (invariantes de cantidad)."""
 
-import pytest
 import pydantic
+import pytest
 
 from heladeria_backend.inventory.domain.inventory import (
     InventoryItem,

@@ -1,11 +1,10 @@
 """API de administración: productos y catálogo."""
 
-from datetime import UTC, datetime
-from typing import Annotated, Any, Literal
+import uuid
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field, model_validator
-import uuid
+from pydantic import BaseModel, Field
 
 from heladeria_backend.catalog.domain.catalog import (
     CatalogItem,
@@ -13,17 +12,14 @@ from heladeria_backend.catalog.domain.catalog import (
     CustomizationGroup,
     GroupOption,
     Product,
-    SelectionInput,
-    CustomizationValidator,
 )
 from heladeria_backend.identity.adapters.api_security import (
     container,
     require_owner,
     require_staff,
 )
-from heladeria_backend.identity.domain.identity import Principal, Role
-from heladeria_backend.shared.domain.errors import NotFoundError, UnavailableError
-from heladeria_backend.shared.domain.mixins import TimestampMixin
+from heladeria_backend.identity.domain.identity import Principal
+from heladeria_backend.shared.domain.errors import NotFoundError
 
 router = APIRouter(prefix="/admin", tags=["admin-catalog"])
 

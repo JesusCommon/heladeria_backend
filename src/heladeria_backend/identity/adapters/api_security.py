@@ -2,11 +2,9 @@
 
 from typing import Annotated
 
-import jwt as pyjwt
 from fastapi import Depends, Header, Request
 
 from heladeria_backend.bootstrap.container import Container
-from heladeria_backend.config.settings import settings
 from heladeria_backend.identity.adapters.security import JwtTokenService
 from heladeria_backend.identity.domain.identity import Principal, Role
 from heladeria_backend.shared.domain.errors import AuthError

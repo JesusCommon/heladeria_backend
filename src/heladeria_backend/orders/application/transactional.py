@@ -5,7 +5,7 @@ import random
 from typing import Any, Awaitable, Callable
 
 import structlog
-from pymongo.errors import OperationFailure, PyMongoError
+from pymongo.errors import OperationFailure
 
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.unit_of_work import (
     MongoUnitOfWork,

@@ -1,7 +1,9 @@
 from functools import lru_cache
 from typing import Literal
+
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(

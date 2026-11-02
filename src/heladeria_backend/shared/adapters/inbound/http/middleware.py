@@ -1,4 +1,5 @@
 import time
+
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request

@@ -8,17 +8,13 @@ import uuid
 
 import pytest
 
-from heladeria_backend.inventory.adapters.mongo_adapter import (
-    MongoInventoryAtomicOps,
-    MongoInventoryItemRepository,
-)
 from heladeria_backend.inventory.domain.inventory import InventoryItem
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.unit_of_work import (
     MongoUnitOfWork,
 )
 from heladeria_backend.shared.domain.errors import (
-    NotFoundError,
     NotEnoughStockError,
+    NotFoundError,
     UnavailableError,
 )
 

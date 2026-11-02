@@ -1,9 +1,9 @@
 """Dominio de Tables: mesa física, dispositivos y sesiones."""
 
-from datetime import UTC, datetime
-from enum import StrEnum
 import secrets
 import uuid
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 

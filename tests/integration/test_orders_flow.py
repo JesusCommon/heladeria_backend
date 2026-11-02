@@ -28,14 +28,11 @@ from heladeria_backend.orders.application.use_cases import (
     start_preparing,
     transition_order,
 )
-from heladeria_backend.orders.domain.order import Order, OrderStatus
-from heladeria_backend.shared.adapters.outbound.persistence.mongo.unit_of_work import (
-    MongoUnitOfWork,
-)
+from heladeria_backend.orders.domain.order import OrderStatus
 from heladeria_backend.shared.domain.errors import ConflictError, NotEnoughStockError
 from heladeria_backend.shared.domain.helpers import sha256_hex
-from heladeria_backend.tables.domain.tables import CustomerSession, Device, Table
 from heladeria_backend.tables.application.use_cases import open_table_session
+from heladeria_backend.tables.domain.tables import CustomerSession, Device, Table
 
 pytestmark = pytest.mark.integration
 
@@ -198,7 +195,6 @@ async def test_idempotency_key_logical_expiry_allows_new_order(env):
         {"key": "k-d4", "customer_session_id": e.cs_ids[0]},
         {"$set": {"expires_at": datetime.now(UTC) - timedelta(seconds=1)}},
     )
-    from heladeria_backend.shared.domain.errors import ConflictError
 
     o2 = await create_order(deps, customer_session_id=e.cs_ids[0], table_session_id=e.table_session.id,
                             table_id=e.table_id, idempotency_key="k-d4", lines=sphere(e))

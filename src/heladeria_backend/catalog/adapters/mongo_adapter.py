@@ -1,7 +1,7 @@
 """Repositorios Mongo del módulo catálogo."""
 
-from typing import Any, Literal
 from datetime import datetime, timezone
+from typing import Any
 
 import structlog
 from pymongo import AsyncMongoClient
@@ -13,7 +13,7 @@ from heladeria_backend.shared.adapters.outbound.persistence.mongo.repo_mixins im
     dump_bson,
     load,
 )
-from heladeria_backend.shared.domain.errors import ConflictError, NotFoundError
+from heladeria_backend.shared.domain.errors import ConflictError
 
 logger = structlog.get_logger()
 

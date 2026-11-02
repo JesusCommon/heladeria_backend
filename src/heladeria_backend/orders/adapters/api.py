@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 from heladeria_backend.catalog.domain.catalog import SelectionInput
 from heladeria_backend.identity.adapters.api_security import (
     container,
-    get_admin_principal,
     get_customer_session,
     require_staff,
 )
@@ -26,8 +25,6 @@ from heladeria_backend.orders.application.use_cases import (
     start_preparing,
 )
 from heladeria_backend.orders.domain.order import OrderStatus
-from heladeria_backend.tables.application.use_cases import open_customer_session as open_cs_uc
-from heladeria_backend.tables.domain.ports import CustomerSessionRepository
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 admin_router = APIRouter(prefix="/admin/orders", tags=["admin-orders"])
@@ -94,14 +91,14 @@ async def create(
         raise UnavailableError("Sesión de mesa inexistente")
     lines = [
         LineInput(
-            product_id=l.product_id,
-            quantity=l.quantity,
+            product_id=line.product_id,
+            quantity=line.quantity,
             selections=[
                 SelectionInput(group_id=s.group_id, catalog_item_id=s.catalog_item_id, quantity=s.quantity)
-                for s in l.selections
+                for s in line.selections
             ],
         )
-        for l in dto.lines
+        for line in dto.lines
     ]
     order = await create_order(
         c.orders_deps,

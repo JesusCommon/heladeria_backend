@@ -41,12 +41,12 @@ from heladeria_backend.orders.adapters.mongo_adapter import (
     MongoOrderNumberPort,
     MongoOrderRepository,
 )
+from heladeria_backend.orders.application.use_cases import OrdersDeps
 from heladeria_backend.orders.domain.ports import (
     IdempotencyRepository,
     OrderNumberPort,
     OrderRepository,
 )
-from heladeria_backend.orders.application.use_cases import OrdersDeps
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.unit_of_work import (
     MongoUnitOfWork,
 )
@@ -56,12 +56,6 @@ from heladeria_backend.tables.adapters.mongo_adapter import (
     MongoDeviceRepository,
     MongoTableRepository,
     MongoTableSessionRepository,
-)
-from heladeria_backend.tables.domain.ports import (
-    CustomerSessionRepository,
-    DeviceRepository,
-    TableRepository,
-    TableSessionRepository,
 )
 from heladeria_backend.tables.application.use_cases import TablesContext
 

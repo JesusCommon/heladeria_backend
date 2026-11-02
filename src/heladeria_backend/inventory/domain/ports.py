@@ -1,6 +1,6 @@
 """Puertos de salida del módulo Inventory.
 
-Contratoseggies que consumen los casos de uso; la sesión de Mongo se
+Contratos que consumen los casos de uso; la sesión de Mongo se
 propaga EXPLÍCITAMENTE: toda operación transaccional recibe `session`.
 """
 
@@ -11,8 +11,8 @@ from typing import Any
 from heladeria_backend.inventory.domain.inventory import (
     InventoryItem,
     InventoryMovement,
-    MovementType,
     Reservation,
+    ReservationState,
 )
 
 
@@ -70,9 +70,9 @@ class ReservationRepository(ABC):
     @abstractmethod
     async def list_statuses(
         self,
-        statuses: list["ReservationState"],
+        statuses: "list[ReservationState]",
         session: Any | None = None,
-    ) -> list["Reservation"]: ...
+    ) -> "list[Reservation]": ...
 
 
 class InventoryAtomicPort(ABC):

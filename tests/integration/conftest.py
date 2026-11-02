@@ -1,4 +1,5 @@
 import pytest_asyncio
+
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     create_mongo_client,
 )

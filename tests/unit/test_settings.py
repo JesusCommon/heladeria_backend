@@ -1,5 +1,7 @@
 import pytest
+
 from heladeria_backend.config.settings import MongoSettings
+
 
 def test_mongo_settings_pool_validation():
     with pytest.raises(ValueError):

@@ -1,8 +1,7 @@
 """API de catálogo público (para el dispositivo/mesa) y cotización."""
 
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from heladeria_backend.catalog.domain.catalog import (
@@ -11,7 +10,6 @@ from heladeria_backend.catalog.domain.catalog import (
 )
 from heladeria_backend.identity.adapters.api_security import (
     container,
-    get_customer_session,
 )
 from heladeria_backend.pricing.domain.service import price_line
 from heladeria_backend.shared.domain.errors import NotFoundError

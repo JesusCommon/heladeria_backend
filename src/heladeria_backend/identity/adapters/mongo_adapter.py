@@ -1,6 +1,7 @@
 """Repositorio Mongo de administradores."""
 
 from typing import Any
+
 from pymongo import AsyncMongoClient
 from pymongo.errors import DuplicateKeyError
 
@@ -10,7 +11,7 @@ from heladeria_backend.shared.adapters.outbound.persistence.mongo.repo_mixins im
     dump_bson,
     load,
 )
-from heladeria_backend.shared.domain.errors import ConflictError, NotFoundError
+from heladeria_backend.shared.domain.errors import ConflictError
 
 
 class MongoAdminUserRepository(AdminUserRepository):

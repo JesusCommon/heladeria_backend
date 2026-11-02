@@ -1,5 +1,7 @@
 import asyncio
+
 from pymongo import AsyncMongoClient
+
 
 async def ping_mongo(client: AsyncMongoClient, timeout_ms: int = 2000) -> None:
 

@@ -1,7 +1,5 @@
 """Pruebas del módulo Tables contra Mongo real."""
 
-import uuid
-from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -14,7 +12,6 @@ from heladeria_backend.shared.domain.errors import (
 from heladeria_backend.shared.domain.helpers import sha256_hex
 from heladeria_backend.tables.application.use_cases import (
     claim_device_link,
-    close_customer_session,
     close_table_session,
     create_device_link,
     create_table,
@@ -22,7 +19,7 @@ from heladeria_backend.tables.application.use_cases import (
     open_table_session,
     update_table,
 )
-from heladeria_backend.tables.domain.tables import Device, Table
+from heladeria_backend.tables.domain.tables import Device
 
 pytestmark = pytest.mark.integration
 
@@ -31,7 +28,6 @@ async def test_create_table_and_unique_number(container):
     ctx = container.tables_ctx
     await create_table(ctx, 5, "Ventana")
     from heladeria_backend.tables.application.use_cases import create_table as create_table_uc
-    from heladeria_backend.tables.domain.tables import Table
 
     with pytest.raises(Exception):  # índice único number
         await create_table_uc(ctx, 5)

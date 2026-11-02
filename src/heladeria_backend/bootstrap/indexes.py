@@ -1,10 +1,8 @@
 """Creación de índices críticos (idempotente al arrancar)."""
 
-from pymongo import AsyncMongoClient
-from pymongo import ASCENDING, DESCENDING
-from pymongo.errors import OperationFailure
-
 import structlog
+from pymongo import ASCENDING, DESCENDING, AsyncMongoClient
+from pymongo.errors import OperationFailure
 
 logger = structlog.get_logger()
 
@@ -19,7 +17,9 @@ async def ensure_indexes(client: AsyncMongoClient, database_name: str) -> None:
         # inventario
         await db["inventory_items"].create_index([("name", ASCENDING)], background=True)
         await db["inventory_movements"].create_index("inventory_item_id", background=True)
-        await db["inventory_movements"].create_index([("inventory_item_id", ASCENDING), ("occurred_at", DESCENDING)], background=True)
+        await db["inventory_movements"].create_index(
+            [("inventory_item_id", ASCENDING), ("occurred_at", DESCENDING)], background=True
+        )
         await db["reservations"].create_index([("order_id", ASCENDING)], background=True)
         await db["reservations"].create_index([("status", ASCENDING), ("expires_at", ASCENDING)], background=True)
 
@@ -43,7 +43,9 @@ async def ensure_indexes(client: AsyncMongoClient, database_name: str) -> None:
 
         # orders + idempotencia D4 (índice único en (key, customer_session_id))
         await db["orders"].create_index([("order_number", ASCENDING)], unique=True, background=True)
-        await db["orders"].create_index([("idempotency_key", ASCENDING), ("customer_session_id", ASCENDING)], background=True)
+        await db["orders"].create_index(
+            [("idempotency_key", ASCENDING), ("customer_session_id", ASCENDING)], background=True
+        )
         await db["orders"].create_index([("status", ASCENDING), ("table_id", ASCENDING)], background=True)
         await db["idempotency_keys"].create_index(
             [("key", ASCENDING), ("customer_session_id", ASCENDING)], unique=True, background=True

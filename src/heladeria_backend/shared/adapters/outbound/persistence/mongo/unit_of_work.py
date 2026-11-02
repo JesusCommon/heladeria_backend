@@ -1,7 +1,9 @@
 from typing import Self
+
 import structlog
 from pymongo import AsyncMongoClient
 from pymongo.errors import InvalidOperation, OperationFailure
+
 from heladeria_backend.shared.application.ports.unit_of_work import UnitOfWork
 
 logger = structlog.get_logger()

@@ -112,7 +112,6 @@ def test_required_group_missing_min_rejected():
 
 def test_optional_group_can_be_empty():
     p, g = cone()
-    salsa = p.customization[1]
     CustomizationValidator.validate(
         p,
         [

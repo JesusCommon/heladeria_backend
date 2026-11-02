@@ -6,27 +6,27 @@ from typing import Any
 import structlog
 from pymongo.errors import DuplicateKeyError
 
-from heladeria_backend.inventory.domain.ports import (
-    InventoryAtomicPort,
-    InventoryItemRepository,
-    MovementRepository,
-    ReservationRepository,
-)
 from heladeria_backend.inventory.domain.inventory import (
     InventoryItem,
     InventoryMovement,
     Reservation,
     ReservationState,
 )
-from heladeria_backend.shared.domain.errors import (
-    ConflictError,
-    NotFoundError,
-    NotEnoughStockError,
-    UnavailableError,
+from heladeria_backend.inventory.domain.ports import (
+    InventoryAtomicPort,
+    InventoryItemRepository,
+    MovementRepository,
+    ReservationRepository,
 )
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.repo_mixins import (
     dump_bson,
     load,
+)
+from heladeria_backend.shared.domain.errors import (
+    ConflictError,
+    NotEnoughStockError,
+    NotFoundError,
+    UnavailableError,
 )
 
 logger = structlog.get_logger()
@@ -234,7 +234,9 @@ class MongoInventoryAtomicOps(InventoryAtomicPort, _Base):
                 session=session,
             )
             if matched is None:
-                raise ConflictError(f"'{item.name}' no tiene reserva activa de {qty}; libera desde el caso de uso idempotente")
+                raise ConflictError(
+                f"'{item.name}' no tiene reserva activa de {qty}; libera desde el caso de uso idempotente"
+            )
             await self._append_movement(item_id, -qty, "release", order_id, actor, session)
 
     async def _append_movement(self, item_id, qty, mtype, order_id, actor, session):

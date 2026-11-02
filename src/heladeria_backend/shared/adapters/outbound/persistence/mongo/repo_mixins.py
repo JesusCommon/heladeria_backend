@@ -4,8 +4,8 @@
 - carga con model_validate para reconstruir modelos desde documentos.
 """
 
-from datetime import timezone
 from typing import Any, Type, TypeVar
+
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
