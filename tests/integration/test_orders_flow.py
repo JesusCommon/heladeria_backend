@@ -185,6 +185,35 @@ async def test_insufficient_stock_clean_abort(env):
     assert record is None
 
 
+async def test_idempotency_key_logical_expiry_allows_new_order(env):
+    """D4: la clave vencida (24h lógicas) se reutiliza aunque el documento
+    siga en la colección (no dependemos del borrado del índice TTL)."""
+    e = env
+    deps = e.container.orders_deps
+    o1 = await create_order(deps, customer_session_id=e.cs_ids[0], table_session_id=e.table_session.id,
+                            table_id=e.table_id, idempotency_key="k-d4", lines=sphere(e))
+    # simular vencimiento lógico manteniendo el documento presente
+    db = e.container.client[e.container.db_name]
+    await db["idempotency_keys"].update_one(
+        {"key": "k-d4", "customer_session_id": e.cs_ids[0]},
+        {"$set": {"expires_at": datetime.now(UTC) - timedelta(seconds=1)}},
+    )
+    from heladeria_backend.shared.domain.errors import ConflictError
+
+    o2 = await create_order(deps, customer_session_id=e.cs_ids[0], table_session_id=e.table_session.id,
+                            table_id=e.table_id, idempotency_key="k-d4", lines=sphere(e))
+    assert o2.id != o1.id
+    assert o2.order_number > o1.order_number
+    # la clave renovada apunta al nuevo pedido
+    refreshed = await deps.orders.get(o1.id)
+    assert refreshed.status is OrderStatus.PENDING
+
+    # clave aún vigente con pedido asociado → mismo resultado
+    o3 = await create_order(deps, customer_session_id=e.cs_ids[0], table_session_id=e.table_session.id,
+                            table_id=e.table_id, idempotency_key="k-d4", lines=sphere(e))
+    assert o3.id == o2.id
+
+
 async def test_cancel_pending_releases_reservation(env):
     e = env
     deps = e.container.orders_deps

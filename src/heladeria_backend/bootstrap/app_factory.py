@@ -23,7 +23,7 @@ from heladeria_backend.tables.adapters.api import router as tables_admin_router
 API_V1 = "/api/v1"
 
 
-def error_payload(exc: DomainError) -> JSONResponse:
+def error_payload(request: Request, exc: DomainError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail, "code": exc.code},

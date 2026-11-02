@@ -29,7 +29,7 @@ from heladeria_backend.orders.domain.order import OrderStatus
 from heladeria_backend.tables.application.use_cases import open_customer_session as open_cs_uc
 from heladeria_backend.tables.domain.ports import CustomerSessionRepository
 
-router = APIRouter(prefix="/api/orders", tags=["orders"])
+router = APIRouter(prefix="/orders", tags=["orders"])
 admin_router = APIRouter(prefix="/admin/orders", tags=["admin-orders"])
 
 

@@ -29,8 +29,10 @@ def get_admin_principal(
 
 
 def require_owner(principal: Annotated[Principal, Depends(get_admin_principal)]) -> Principal:
+    from heladeria_backend.shared.domain.errors import PermissionDeniedError
+
     if principal.role != Role.OWNER:
-        raise AuthError("Se requiere rol OWNER")
+        raise PermissionDeniedError("Se requiere rol OWNER")
     return principal
 
 

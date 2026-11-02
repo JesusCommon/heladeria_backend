@@ -19,7 +19,9 @@ class MongoAdminUserRepository(AdminUserRepository):
         self._db = client[database_name]
 
     async def save(self, user: AdminUser, session: Any | None = None) -> AdminUser:
-        user.updated_at = AdminUser.model_fields["updated_at"].get_default()
+        from datetime import UTC, datetime
+
+        user.updated_at = datetime.now(UTC)
         doc = dump_bson(user)
         doc["_id"] = doc.pop("id")
         doc.pop("created_at", None)

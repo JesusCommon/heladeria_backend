@@ -124,25 +124,36 @@ async def _create_order_tx(
 ) -> Order:
     now = deps.clock.now()
 
-    # ---- 1. Idempotencia (D4: vigencia lógica, no dependencia del TTL TTL index)
+    # ---- 1. Idempotencia (D4: vigencia LÓGICA de 24h, no solo el índice TTL)
     record = await deps.idempotency.find(idempotency_key, customer_session_id, session=session)
-    if record is not None and record.order_id:
-        order = await deps.orders.get(record.order_id, session=session)
-        if order is not None:
-            logger.info("orders.idempotent_hit", order_number=order.order_number)
-            return order
     if record is None:
-        await deps.idempotency.insert(
-            IdempotencyRecord(
-                key=idempotency_key,
-                customer_session_id=customer_session_id,
-                order_id=None,
-                expires_at=now + timedelta(seconds=deps.idempotency_ttl),
-            ),
-            session=session,
-        )
+        from pymongo.errors import DuplicateKeyError
+
+        try:
+            await deps.idempotency.insert(
+                IdempotencyRecord(
+                    key=idempotency_key,
+                    customer_session_id=customer_session_id,
+                    order_id=None,
+                    expires_at=now + timedelta(seconds=deps.idempotency_ttl),
+                ),
+                session=session,
+            )
+        except DuplicateKeyError:
+            # otra tx simultánea reservó la clave primero
+            raise ConflictError("Clave de idempotencia en proceso")
+    elif record.expires_at > now:
+        # clave vigente: misma (key, sesión) devuelve el resultado anterior
+        if record.order_id:
+            order = await deps.orders.get(record.order_id, session=session)
+            if order is not None:
+                logger.info("orders.idempotent_hit", order_number=order.order_number)
+                return order
+            raise ConflictError("Clave de idempotencia en proceso")
+        # sin order_id aún (tx simultánea en vuelo): no crear duplicado
+        raise ConflictError("Clave de idempotencia en proceso")
     else:
-        # expirada: reutiliza clave
+        # expirada lógicamente: la clave se reutiliza (D4)
         await deps.idempotency.renew(
             idempotency_key,
             customer_session_id,
