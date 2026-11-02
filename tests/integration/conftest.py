@@ -3,6 +3,8 @@ from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     create_mongo_client,
 )
 
+pytest_plugins = ["tests.integration.helpers"]
+
 TEST_DATABASE = "heladeria_test_db"
 
 @pytest_asyncio.fixture

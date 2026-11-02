@@ -52,10 +52,64 @@ class MongoSettings(BaseSettings):
             raise ValueError("pool_min_size no puede ser mayor que pool_max_size")
         return self
 
+class SecuritySettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        env_prefix="SECURITY_",
+    )
+
+    jwt_secret: str
+    jwt_algorithm: str = "HS256"
+    jwt_ttl_minutes: int = Field(default=720, gt=0)
+    device_link_ttl_minutes: int = Field(default=10, gt=0)
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def _validate_secret(cls, v: str) -> str:
+        if len(v) < 16:
+            raise ValueError("jwt_secret debe tener al menos 16 caracteres")
+        return v
+
+
+class BusinessSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        env_prefix="BUSINESS_",
+    )
+
+    # D3: expiración de reservas de pedidos aún no aceptados
+    reservation_ttl_seconds: int = Field(default=600, gt=0)
+    # D4: vigencia lógica de claves de idempotencia
+    idempotency_ttl_seconds: int = Field(default=86400, gt=0)
+    # Intervalo del barrido de expiración (tarea en segundo plano)
+    expiration_sweep_seconds: int = Field(default=30, gt=0)
+    currency: str = "COP"
+
+
+class AdminSeedSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        env_prefix="ADMIN_SEED_",
+    )
+
+    enabled: bool = True
+    owner_username: str = "owner"
+    owner_password: str = "heladeria-owner-123"
+
+
 class Settings:
     def __init__(self) -> None:
         self.app = AppSettings()
         self.mongo = MongoSettings()
+        self.security = SecuritySettings()
+        self.business = BusinessSettings()
+        self.admin_seed = AdminSeedSettings()
 
 @lru_cache
 def get_settings() -> Settings:
