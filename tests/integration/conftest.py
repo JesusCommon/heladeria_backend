@@ -2,8 +2,11 @@ import pytest_asyncio
 from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
     create_mongo_client,
 )
-
-pytest_plugins = ["tests.integration.helpers"]
+from tests.integration.helpers import (  # noqa: F401
+    container,
+    test_client,
+    test_db,
+)
 
 TEST_DATABASE = "heladeria_test_db"
 

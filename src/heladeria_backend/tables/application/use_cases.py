@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
+import uuid
 
 import structlog
 
@@ -23,6 +24,7 @@ from heladeria_backend.tables.domain.ports import (
 )
 from heladeria_backend.tables.domain.tables import (
     CustomerSession,
+    CustomerSessionStatus,
     Device,
     Table,
     TableSessionStatus,
@@ -88,32 +90,40 @@ async def create_device_link(ctx: TablesContext, table_id: str,
     if await ctx.tables.get(table_id) is None:
         raise NotFoundError(f"Mesa {table_id} no existe")
     code = generate_link_code()
+    now = ctx.clock.now()
     device = Device(
-        name=device_name or f"device-{device_id(ctx) or ''}",
+        name=device_name or f"device-{uuid.uuid4().hex[:8]}",
         linked_table_id=table_id,
         link_code=code,
-        link_expires_at=datetime.now(UTC) + timedelta(minutes=ttl_minutes),
+        link_expires_at=now + timedelta(minutes=ttl_minutes),
         is_active=False,  # se activa al reclamar
     )
     await ctx.devices.save(device)
     return device, code
 
 
+def _as_aware(dt: datetime) -> datetime:
+    """Mongo devuelve fechas naive (tz_aware=False en tests); uniformar a UTC aware."""
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
+
+
 async def claim_device_link(ctx: TablesContext, code: str) -> tuple[Device, str]:
-    """El dispositivo (tablet) reclama el código y obtiene su token definitivo."""
+    """El dispositivo (tablet) reclama el código y obtiene su token definitivo.
+
+    El código es de un solo uso: si el dispositivo ya fue reclamado se avisa
+    conflicto (aunque el código siga indexado para dar un mensaje claro)."""
     if not code or not code.strip():
         raise DomainValidationError("Código de vinculación requerido")
     device = await ctx.devices.get_by_link_code(code.strip().upper())
     if device is None:
         raise NotFoundError("Código de vinculación inválido")
-    ctx.clock.now()
-    if device.link_expires_at and device.link_expires_at < datetime.now(UTC):
-        raise UnavailableError("Código de vinculación expirado")
     if device.token_hash is not None:
         raise ConflictError("Device ya está vinculado")
+    if device.link_expires_at and _as_aware(device.link_expires_at) < ctx.clock.now():
+        raise UnavailableError("Código de vinculación expirado")
     token = generate_session_token()
     device.token_hash = sha256_hex(token)
-    device.link_code = None
+    device.link_code = None  # código quemado: un solo uso
     device.link_expires_at = None
     device.is_active = True
     await ctx.devices.save(device)
@@ -150,10 +160,10 @@ async def close_table_session(ctx: TablesContext, table_session_id: str) -> Tabl
     if not ts or ts.status != TableSessionStatus.OPEN:
         raise NotFoundError("Sesión de mesa no abierta")
     for cs in await ctx.customer_sessions.list_by_table_session(ts.id):
-        cs.status = "closed"
+        cs.status = CustomerSessionStatus.CLOSED
         cs.closed_at = datetime.now(UTC)
         await ctx.customer_sessions.save(cs)
-    ts.status = "closed"
+    ts.status = TableSessionStatus.CLOSED
     ts.closed_at = datetime.now(UTC)
     await ctx.table_sessions.save(ts)
     table = await ctx.tables.get(ts.table_id)
@@ -192,7 +202,7 @@ async def close_customer_session(ctx: TablesContext, customer_session_id: str) -
     cs = await ctx.customer_sessions.get(customer_session_id)
     if not cs:
         raise NotFoundError("CustomerSession no existe")
-    cs.status = "closed"
+    cs.status = CustomerSessionStatus.CLOSED
     cs.closed_at = datetime.now(UTC)
     await ctx.customer_sessions.save(cs)
     return cs
