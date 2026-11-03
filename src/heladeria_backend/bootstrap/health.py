@@ -7,7 +7,7 @@ from heladeria_backend.shared.adapters.outbound.persistence.mongo import (
 )
 
 logger = structlog.get_logger()
-router = APIRouter(prefix="/health", tags=["health"])  # noqa: RUF012
+router = APIRouter(prefix="/health", tags=["health"])
 
 _PING_TIMEOUT_MS = 2000
 

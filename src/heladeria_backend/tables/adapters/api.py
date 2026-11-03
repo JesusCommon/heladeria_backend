@@ -12,10 +12,18 @@ from heladeria_backend.identity.adapters.api_security import (
     require_staff,
 )
 from heladeria_backend.identity.domain.identity import Principal
-from heladeria_backend.shared.domain.errors import AuthError
+from heladeria_backend.shared.adapters.inbound.http.rate_limit import (
+    FailedAttemptLimiter,
+    assert_allowed,
+    client_ip,
+)
+from heladeria_backend.shared.domain.errors import AuthError, NotFoundError
 from heladeria_backend.shared.domain.helpers import sha256_hex
 
 router = APIRouter(prefix="/admin/tables", tags=["admin-tables"])
+
+# /device/claim es público: bloquear tras 20 códigos inválidos/min por IP
+_CLAIM_LIMIT = FailedAttemptLimiter(max_attempts=20, window_seconds=60)
 
 
 class TableIn(BaseModel):
@@ -119,8 +127,20 @@ class CustomerSessionOut(BaseModel):
 @public_router.post("/claim", status_code=200)
 async def claim_device(dto: ClaimIn, request: Request):
     c = container(request)
+    key = f"claim:{client_ip(request)}"
+    assert_allowed(_CLAIM_LIMIT, key)
+    import structlog
+
     from heladeria_backend.tables.application.use_cases import claim_device_link as uc
-    device, token = await uc(c.tables_ctx, dto.link_code)
+
+    logger = structlog.get_logger()
+    try:
+        device, token = await uc(c.tables_ctx, dto.link_code)
+    except NotFoundError:
+        # código errado: solo aquí se cuenta como intento fallido (fuerza bruta)
+        logger.warning("device.claim.invalid_code", client=key)
+        _CLAIM_LIMIT.record(key)
+        raise
     return {"device_id": device.id, "table_id": device.linked_table_id, "device_token": token}
 
 
@@ -130,7 +150,9 @@ async def open_customer_session(
     x_device_token: Annotated[str, Header()],
 ):
     c = container(request)
-    from heladeria_backend.tables.application.use_cases import open_customer_session as uc
+    from heladeria_backend.tables.application.use_cases import (
+        open_customer_session as uc,
+    )
     cs, token = await uc(c.tables_ctx, x_device_token)
     return {
         "customer_session_id": cs.id,
@@ -149,6 +171,8 @@ async def close_customer_session(
     cs = await c.tables_ctx.customer_sessions.get_by_token_hash(sha256_hex(x_customer_token))
     if cs is None:
         raise AuthError("Sesión de cliente inválida")
-    from heladeria_backend.tables.application.use_cases import close_customer_session as uc
+    from heladeria_backend.tables.application.use_cases import (
+        close_customer_session as uc,
+    )
     cs = await uc(c.tables_ctx, cs.id)
     return {"customer_session_id": cs.id, "status": cs.status.value}

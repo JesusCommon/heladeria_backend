@@ -2,7 +2,8 @@
 
 import asyncio
 import random
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 import structlog
 from pymongo.errors import OperationFailure

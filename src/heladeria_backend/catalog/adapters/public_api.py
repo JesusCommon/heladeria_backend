@@ -17,26 +17,6 @@ from heladeria_backend.shared.domain.errors import NotFoundError
 router = APIRouter(prefix="/public", tags=["public"])
 
 
-async def _availability_map(request: Request) -> dict[str, bool]:
-    """:id -> puede seleccionarse (activo + stock suficiente para 1 unidad)."""
-    c = container(request)
-    avail: dict[str, bool] = {}
-    for item in await c.inventory_items.list():
-        ok = item.is_active if item.track_stock else True
-        avail[item.id] = bool(ok)
-    products = await c.products.list(active_only=True)
-    for product in products:
-        reqs = product.consumptions_for([], 1)
-        avail.setdefault(product.id, product.is_active)
-        # base_consumption disponible
-        product_ok = all(avail.get(item_id, True) or not any(
-            i.id == item_id and i.track_stock
-            for i in await c.inventory_items.list()
-        ) for item_id in reqs)
-        avail[product.id] = product_ok
-    return avail
-
-
 @router.get("/catalog")
 async def public_catalog(request: Request):
     c = container(request)

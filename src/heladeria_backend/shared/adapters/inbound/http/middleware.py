@@ -1,4 +1,5 @@
 import time
+from typing import ClassVar
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -61,4 +62,23 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         else:
             logger.info("http_request", **log_data)
 
+        return response
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Cabeceras de seguridad esenciales en cada respuesta."""
+
+    HEADERS: ClassVar[dict[str, str]] = {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer",
+        "Cross-Origin-Resource-Policy": "same-site",
+    }
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        response = await call_next(request)
+        for header, value in self.HEADERS.items():
+            response.headers.setdefault(header, value)
         return response

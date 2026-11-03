@@ -69,7 +69,13 @@ class CustomerSession(BaseModel):
 
 
 def generate_link_code() -> str:
-    return "".join(secrets.choice("0123456789ABCDEF") for _ in range(8))
+    """Código de vinculación de un solo uso.
+
+    12 caracteres hex = 2^48 (~2.8·10^14) combinaciones: suficiente para
+    resistir fuerza bruta dentro de su ventana de vida (10 min) incluso
+    combinado con el rate limit del endpoint de claim.
+    """
+    return "".join(secrets.choice("0123456789ABCDEF") for _ in range(12))
 
 
 def generate_session_token() -> str:

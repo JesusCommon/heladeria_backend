@@ -85,7 +85,7 @@ class Container:
 
 def build_container(client: AsyncMongoClient, database_name: str | None = None) -> Container:
     db = database_name or settings.mongo.database
-    uow_factory = lambda: MongoUnitOfWork(client, db)  # noqa: E731
+    uow_factory = lambda: MongoUnitOfWork(client, db)
     clock = SystemClock()
     users = MongoAdminUserRepository(client, db)
     hasher = Argon2PasswordHasher()

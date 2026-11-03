@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from heladeria_backend.identity.adapters.api_security import (
@@ -158,7 +158,15 @@ async def get_reservations(
 ) -> list[dict]:
     c = container(request)
     wanted = [s.strip() for s in statuses.split(",") if s.strip()]
-    state_list = [ReservationState(s) for s in wanted]
+    state_list = []
+    for s in wanted:
+        try:
+            state_list.append(ReservationState(s))
+        except ValueError as e:
+            raise HTTPException(
+                422,
+                f"statuses inválidos. Valores: {[st.value for st in ReservationState]}",
+            ) from e
     reservations = await list_reservations(_ctx(c), state_list)
     return [
         {

@@ -4,7 +4,7 @@
 - carga con model_validate para reconstruir modelos desde documentos.
 """
 
-from typing import Any, Type, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -24,11 +24,11 @@ def _normalise(value: Any) -> Any:
     import datetime as _dt
 
     if isinstance(value, _dt.datetime) and value.tzinfo is None:
-        return value.replace(tzinfo=_dt.timezone.utc)
+        return value.replace(tzinfo=_dt.UTC)
     return value
 
 
-def load(model_class: Type[T], doc: dict[str, Any]) -> T:
+def load(model_class: type[T], doc: dict[str, Any]) -> T:
     data = dict(doc)
     if "_id" in data and "id" not in data:
         data["id"] = data.pop("_id")

@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
 from heladeria_backend.catalog.domain.catalog import SelectionInput
@@ -31,19 +31,19 @@ admin_router = APIRouter(prefix="/admin/orders", tags=["admin-orders"])
 
 
 class SelectionIn(BaseModel):
-    group_id: str
-    catalog_item_id: str
-    quantity: int = Field(default=1, ge=1)
+    group_id: str = Field(max_length=64)
+    catalog_item_id: str = Field(max_length=64)
+    quantity: int = Field(default=1, ge=1, le=99)
 
 
 class LineIn(BaseModel):
-    product_id: str
-    quantity: int = Field(default=1, ge=1)
-    selections: list[SelectionIn] = Field(default_factory=list)
+    product_id: str = Field(max_length=64)
+    quantity: int = Field(default=1, ge=1, le=999)
+    selections: list[SelectionIn] = Field(default_factory=list, max_length=30)
 
 
 class CreateOrderIn(BaseModel):
-    lines: list[LineIn] = Field(min_length=1)
+    lines: list[LineIn] = Field(min_length=1, max_length=50)
     idempotency_key: str = Field(min_length=4, max_length=128)
 
 
@@ -136,9 +136,21 @@ async def admin_list_orders(
     table_id: str | None = None,
 ):
     c = container(request)
-    st = OrderStatus(status) if status else None
+    st = _parse_order_status(status)
     orders = await list_orders(c.orders_deps, status=st, table_id=table_id)
     return [_order_out(o) for o in orders]
+
+
+def _parse_order_status(status: str | None) -> OrderStatus | None:
+    if not status:
+        return None
+    try:
+        return OrderStatus(status)
+    except ValueError as e:
+        raise HTTPException(
+            422,
+            f"status inválido '{status}'. Valores: {[s.value for s in OrderStatus]}",
+        ) from e
 
 
 @admin_router.post("/{order_id}/accept")
@@ -170,7 +182,7 @@ async def admin_cancel(
     order_id: str,
     request: Request,
     _: Annotated[Principal, Depends(require_staff)],
-    reason: str = "cancelado por staff",
+    reason: Annotated[str, Query(max_length=200)] = "cancelado por staff",
 ):
     c = container(request)
     return _order_out(await cancel_order(c.orders_deps, order_id, reason))

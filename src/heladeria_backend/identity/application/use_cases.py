@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+import argon2
 import structlog
 
 from heladeria_backend.identity.domain.identity import AdminUser, Principal, Role
@@ -18,6 +19,23 @@ from heladeria_backend.shared.domain.errors import (
 
 logger = structlog.get_logger()
 
+# Hash ficticio: se verifica un hash Argon2 real aunque el usuario NO exista,
+# igualando el tiempo de respuesta y frustrando la enumeración de usuarios
+# mediante análisis de timing.
+_DUMMY_HASHER = argon2.PasswordHasher()
+_DUMMY_HASH = _DUMMY_HASHER.hash("timing-equalizer-not-a-real-password")
+
+
+class Argon2TimingProbe:
+    """Verifica contra el hash dummy: siempre falla, pero con el mismo coste."""
+
+    @staticmethod
+    def verify(plain: str) -> None:
+        try:
+            _DUMMY_HASHER.verify(_DUMMY_HASH, plain)
+        except argon2.exceptions.Argon2Error:
+            pass
+
 
 @dataclass
 class IdentityContext:
@@ -29,6 +47,8 @@ class IdentityContext:
 async def login(ctx: IdentityContext, username: str, password: str) -> tuple[AdminUser, str]:
     user = await ctx.users.get_by_username(username)
     if user is None or not user.is_active:
+        # igualar el timing: gastar el mismo trabajo que una verificación real
+        Argon2TimingProbe.verify(password)
         raise AuthError("Credenciales inválidas")
     if not ctx.hasher.verify(password, user.password_hash):
         raise AuthError("Credenciales inválidas")

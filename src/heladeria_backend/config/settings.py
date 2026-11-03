@@ -70,8 +70,8 @@ class SecuritySettings(BaseSettings):
     @field_validator("jwt_secret")
     @classmethod
     def _validate_secret(cls, v: str) -> str:
-        if len(v) < 16:
-            raise ValueError("jwt_secret debe tener al menos 16 caracteres")
+        if len(v) < 32:
+            raise ValueError("jwt_secret debe tener al menos 32 caracteres")
         return v
 
 

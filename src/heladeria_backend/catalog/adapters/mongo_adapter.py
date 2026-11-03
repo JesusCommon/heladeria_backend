@@ -1,6 +1,6 @@
 """Repositorios Mongo del módulo catálogo."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
@@ -8,7 +8,10 @@ from pymongo import AsyncMongoClient
 from pymongo.errors import DuplicateKeyError
 
 from heladeria_backend.catalog.domain.catalog import CatalogItem, Product
-from heladeria_backend.catalog.domain.ports import CatalogItemRepository, ProductRepository
+from heladeria_backend.catalog.domain.ports import (
+    CatalogItemRepository,
+    ProductRepository,
+)
 from heladeria_backend.shared.adapters.outbound.persistence.mongo.repo_mixins import (
     dump_bson,
     load,
@@ -19,7 +22,7 @@ logger = structlog.get_logger()
 
 
 def _utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class MongoProductRepository(ProductRepository):

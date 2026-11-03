@@ -1,8 +1,8 @@
 """Arranque del backend: conexión, índices, seed OWNER y tarea de expiración."""
 
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI
@@ -19,7 +19,7 @@ logger = structlog.get_logger()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     reconfigure_uvicorn_loggers()
     logger.info("mongo.client.initializing", app_name=settings.app.slug)
 

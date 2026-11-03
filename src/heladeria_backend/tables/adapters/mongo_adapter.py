@@ -17,7 +17,12 @@ from heladeria_backend.tables.domain.ports import (
     TableRepository,
     TableSessionRepository,
 )
-from heladeria_backend.tables.domain.tables import CustomerSession, Device, Table, TableSession
+from heladeria_backend.tables.domain.tables import (
+    CustomerSession,
+    Device,
+    Table,
+    TableSession,
+)
 
 
 def _now():
